@@ -7,3 +7,9 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic-ai>=1.9.1",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pydantic>=2.1.0",
+    "pydantic-settings>=1.0.0",
+]

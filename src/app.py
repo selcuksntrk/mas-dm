@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from utils.agents import *
-from utils.evaluators import *
+from src.utils.evaluator_state import *
 
 from groq import BaseModel
 

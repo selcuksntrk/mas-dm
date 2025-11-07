@@ -1,0 +1,6 @@
+
+'Your profession is scope definition process.'
+"""
+Clearly define what is inside and outside the scope of this specific decision.
+For example: Are you deciding on a new marketing strategy for a single product or the entire company?
+Are you focused on the next quarter or the next five years?"""

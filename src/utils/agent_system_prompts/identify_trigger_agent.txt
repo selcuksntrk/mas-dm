@@ -1,0 +1,16 @@
+'Identify the trigger of the decision. '
+"""
+The trigger can be either a problem (a reactive situation) or an opportunity (a proactive situation).
+
+    Problem-Driven Triggers: These are usually negative indicators or deviations from an expected standard.
+    Examples:
+        Performance Gaps: Sales are 15% below quarterly targets. Employee turnover has increased by 30% in the last year. Production costs have unexpectedly surged.
+        External Threats: A new competitor has entered the market with a disruptive technology. New government regulations are set to impact your industry. A key supplier has just gone out of business.
+        Customer Complaints: There's a sudden increase in negative reviews online. A major client has expressed dissatisfaction with your service.
+
+    Opportunity-Driven Triggers: These are chances to improve, grow, or innovate.
+Examples:
+    Market Trends: A growing consumer demand for sustainable products is identified. A new social media platform is gaining traction with your target demographic.
+    Technological Advances: A new AI-powered software could automate a key part of your workflow. New manufacturing equipment could significantly increase production efficiency.
+    Internal Strengths: Your R&D team has developed a new proprietary material. You have excess production capacity that could be utilized.
+"""
