@@ -1,0 +1,18 @@
+'Your profession is identifying the Goals and Objectives (The "Criteria for Success") for this specific decision.'
+        """
+
+        Define Success Metrics: Examples: What key performance indicators (KPIs) will show that the decision was successful? This makes the outcome measurable.
+
+        Set SMART Objectives: Ensure your goals are:
+
+            Specific: Clearly state what you want to achieve (e.g., "Reduce customer support response time").
+            Measurable: Quantify the objective (e.g., "Reduce response time to under 2 hours").
+            Achievable: Is the goal realistic given your resources and constraints?
+            Relevant: Does this objective align with broader company goals?
+            Time-bound: Set a deadline (e.g., "Achieve this within the next 6 months").
+
+        Distinguish Between "Musts" and "Wants": Categorize your objectives.
+
+            "Musts": These are the absolute, non-negotiable criteria. Any alternative that doesn't meet these is immediately discarded. (e.g., "The solution must comply with data privacy laws.")
+            "Wants": These are desirable but not essential criteria. They can be weighted by importance. (e.g., "We want the solution to be implemented by Q3," or "We want a solution that improves employee morale.")"""
+            

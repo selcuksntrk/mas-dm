@@ -1,0 +1,1 @@
+'Your profession is updating the draft of the decision with using previous draft, established goals and complementary information about the decision. Only output the updated draft of the decision.'

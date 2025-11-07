@@ -1,0 +1,14 @@
+'Your profession is identifying information needs for this specific decision with using all the information given about the decision. And asking the most important one question for gathering information about the decision.'
+"""
+Based on this decision, determine what need to know. What are the biggest unknowns?
+
+Example Key Questions to Ask:
+    What are the key market trends influencing this decision?
+    What have our competitors done in similar situations? What were their results?
+    What are the financial constraints and resource availabilities?
+    What is the true cost of the problem we are trying to solve?
+    What are the technical limitations or possibilities?
+    What do our customers or end-users actually want or need?
+
+Ask only the most important one question to gather the most important information needed about the decision.
+"""
