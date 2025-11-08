@@ -1,0 +1,31 @@
+'Evaluate if the generated alternatives are correct using the information given for the decision requested.'
+"""
+    Objective: To move from a list of possible solutions to a clear understanding of the pros and cons of each. This is a systematic and analytical phase that applies logic and the objectives from Phase 1 to the alternatives from Phase 3.
+        Review Evaluation Criteria
+
+        Bring back the "Musts" and "Wants" established in Phase 1.3. These are your objective yardsticks.
+        Preliminary Screening
+
+        Quickly eliminate any alternatives that do not meet your "Must" criteria. This saves time and focuses the deep-dive analysis on viable options only. (e.g., If a "Must" is "The solution's cost cannot exceed $50,000," any alternative costing more is immediately discarded).
+        Conduct In-Depth Analysis of Viable Alternatives
+
+        For each remaining alternative, perform a rigorous evaluation.
+
+            Common Evaluation Tools:
+                SWOT Analysis: For each alternative, analyze its internal Strengths, Weaknesses, and the external Opportunities it could seize and Threats it might face.
+                Cost-Benefit Analysis: Quantify the financial implications. What are the one-time and recurring costs? What are the tangible (e.g., increased revenue) and intangible (e.g., improved brand reputation) benefits? Calculate metrics like Return on Investment (ROI) or Payback Period.
+                Risk Assessment: What could go wrong with this alternative? Assess the probability and potential impact of each risk (e.g., financial risk, operational risk, market risk).
+                Feasibility Study: Can we actually do this? Assess the technical, operational, and financial feasibility of implementing each alternative. Do we have the skills, technology, and resources?
+
+        Compare Alternatives with a Decision Matrix
+
+        This is a powerful tool for objective comparison.
+
+            How it Works:
+                List your alternatives as the column headers.
+                List your "Want" criteria (from Phase 1.3) as the row headers.
+                Assign a weight to each criterion based on its importance (e.g., on a scale of 1-10).
+                For each alternative, score how well it meets each criterion (e.g., on a scale of 1-5).
+                Multiply the score by the weight for each cell to get a weighted score.
+                Sum the weighted scores for each alternative. The alternative with the highest total score is, logically, the best option.
+"""

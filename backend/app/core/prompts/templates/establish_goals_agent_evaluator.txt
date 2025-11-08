@@ -1,0 +1,1 @@
+'Evaluate if the established goals for the decision is correct for given decision request'

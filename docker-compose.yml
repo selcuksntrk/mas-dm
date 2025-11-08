@@ -1,0 +1,163 @@
+# ==============================================================================
+# DOCKER COMPOSE EXPLANATION
+# ==============================================================================
+# Docker Compose is a tool for defining and running multi-container applications
+# Instead of running multiple `docker run` commands, you define everything in YAML
+# and run `docker-compose up` to start all services together
+#
+# Key Concepts:
+# - Service: A container definition (e.g., backend API, Redis database)
+# - Network: Services can communicate using service names as hostnames
+# - Volume: Persistent storage that survives container restarts
+# - Environment: Variables passed to containers (like config settings)
+# ==============================================================================
+
+version: '3.8'  # Docker Compose file format version
+
+# ==============================================================================
+# SERVICES SECTION
+# ==============================================================================
+# Each service is a container that will run as part of your application
+services:
+  
+  # ----------------------------------------------------------------------------
+  # Backend API Service
+  # ----------------------------------------------------------------------------
+  backend:
+    # Build configuration
+    build:
+      context: ./backend  # Where to find the Dockerfile
+      dockerfile: Dockerfile  # Name of the Dockerfile
+    
+    # Container name (easier to reference than auto-generated names)
+    container_name: decision-backend
+    
+    # Port mapping: HOST_PORT:CONTAINER_PORT
+    # Maps port 8001 on your machine to port 8001 in the container
+    # Access at http://localhost:8001
+    ports:
+      - "8001:8001"
+    
+    # Environment variables (configuration)
+    # These override defaults in your app's config
+    environment:
+      # API Configuration
+      - API_TITLE=Multi-Agent Decision Making API
+      - API_VERSION=0.2.0
+      
+      # Model Configuration (using environment variables)
+      - MODEL_NAME=${MODEL_NAME:-gpt-4o-mini}
+      - EVALUATION_MODEL_NAME=${EVALUATION_MODEL_NAME:-gpt-4o-mini}
+      
+      # API Keys (NEVER hardcode these - use environment variables)
+      # Set these in a .env file (see .env.example)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      
+      # Redis Configuration (async process persistence)
+      # ENABLE_REDIS_PERSISTENCE=true enables persistent process storage
+      # Processes survive server restarts and enable horizontal scaling
+      - ENABLE_REDIS_PERSISTENCE=${ENABLE_REDIS_PERSISTENCE:-true}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      # REDIS_PASSWORD is optional, uncomment if Redis requires auth
+      # - REDIS_PASSWORD=${REDIS_PASSWORD}
+      
+      # Development settings
+      - LOG_LEVEL=INFO
+    
+    # Volumes: Mount directories from host to container
+    # Syntax: HOST_PATH:CONTAINER_PATH:MODE
+    # - ./backend/app:/app/app:ro means:
+    #   - Host: ./backend/app directory
+    #   - Container: /app/app directory
+    #   - ro: read-only (container can't modify host files)
+    # Why? Enables hot-reload during development without rebuilding
+    volumes:
+      # Mount source code for development (optional, remove in production)
+      - ./backend/app:/app/app:ro
+      
+      # Mount data directory for persistence
+      - ./backend/data:/app/data
+    
+    # Restart policy: what to do if container crashes
+    # - no: never restart
+    # - always: always restart
+    # - on-failure: restart only if exit code != 0
+    # - unless-stopped: always restart unless manually stopped
+    restart: unless-stopped
+    
+    # Dependencies: start these services before this one
+    # Backend needs Redis to be running first (for future persistence)
+    depends_on:
+      redis:
+        condition: service_healthy  # Wait for Redis health check to pass
+    
+    # Health check: determine if service is ready
+    # Docker Compose can wait for this before starting dependent services
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Networks this service connects to
+    networks:
+      - app-network
+  
+  # ----------------------------------------------------------------------------
+  # Redis Service (for future async process persistence)
+  # ----------------------------------------------------------------------------
+  redis:
+    # Use official Redis image from Docker Hub
+    # redis:7-alpine is a small, secure version of Redis 7
+    image: redis:7-alpine
+    
+    container_name: decision-redis
+    
+    # Port mapping
+    # Expose Redis on localhost:6379 for debugging (optional)
+    ports:
+      - "6379:6379"
+    
+    # Redis command-line options
+    # --maxmemory 256mb: limit memory usage
+    # --maxmemory-policy allkeys-lru: evict least recently used keys when full
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    
+    # Volume for Redis data persistence
+    # Named volume 'redis-data' persists even if container is removed
+    volumes:
+      - redis-data:/data
+    
+    restart: unless-stopped
+    
+    # Health check for Redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    
+    networks:
+      - app-network
+
+# ==============================================================================
+# NETWORKS SECTION
+# ==============================================================================
+# Define custom networks for service communication
+# Services on the same network can reach each other using service names
+networks:
+  app-network:
+    driver: bridge  # Bridge network allows container-to-container communication
+
+# ==============================================================================
+# VOLUMES SECTION
+# ==============================================================================
+# Named volumes for persistent data
+# Data in named volumes persists even when containers are removed
+volumes:
+  redis-data:
+    driver: local  # Store data on local filesystem
