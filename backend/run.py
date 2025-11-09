@@ -8,9 +8,9 @@ import uvicorn
 
 if __name__ == "__main__":
     uvicorn.run(
-        "backend.app.main:app",
+        "app.main:app",  # Fixed: use relative import from backend directory
         host="0.0.0.0",
-        port=8001,  # Use different port from old app
+        port=8001,
         reload=True,
         log_level="info"
     )

@@ -54,14 +54,14 @@ This allows:
 import json
 import pickle
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional, List, Dict
 
 import redis
 from redis.exceptions import RedisError
 
-from backend.app.models.domain import ProcessInfo, DecisionState
-from backend.app.config import get_settings
+from app.models.domain import ProcessInfo, DecisionState
+from app.config import get_settings
 
 
 class IProcessRepository(ABC):
@@ -106,8 +106,8 @@ class IProcessRepository(ABC):
         pass
     
     @abstractmethod
-    async def delete(self, process_id: str) -> None:
-        """Delete a process."""
+    async def delete(self, process_id: str) -> bool:
+        """Delete a process. Returns True if deleted, False if not found."""
         pass
     
     @abstractmethod
@@ -162,9 +162,12 @@ class InMemoryProcessRepository(IProcessRepository):
         """Check if process exists in memory."""
         return process_id in self._storage
     
-    async def delete(self, process_id: str) -> None:
-        """Delete process from memory."""
-        self._storage.pop(process_id, None)
+    async def delete(self, process_id: str) -> bool:
+        """Delete process from memory. Returns True if deleted, False if not found."""
+        if process_id in self._storage:
+            del self._storage[process_id]
+            return True
+        return False
     
     async def list_all(self) -> List[ProcessInfo]:
         """List all processes from memory."""
@@ -355,6 +358,7 @@ class RedisProcessRepository(IProcessRepository):
                 "process_id": process.process_id,
                 "status": process.status,
                 "error": process.error or "",
+                "query": process.query or "",
                 "created_at": process.created_at or "",
                 "completed_at": process.completed_at or ""
             }
@@ -438,6 +442,7 @@ class RedisProcessRepository(IProcessRepository):
             # Reconstruct ProcessInfo
             return ProcessInfo(
                 process_id=metadata.get("process_id", process_id),
+                query=metadata.get("query", ""),
                 status=metadata.get("status", "unknown"),
                 result=result,
                 error=metadata.get("error") or None,
@@ -467,7 +472,7 @@ class RedisProcessRepository(IProcessRepository):
         except RedisError:
             return False
     
-    async def delete(self, process_id: str) -> None:
+    async def delete(self, process_id: str) -> bool:
         """
         Delete process from Redis.
         
@@ -484,8 +489,15 @@ class RedisProcessRepository(IProcessRepository):
         - Memory leaks
         - Orphaned data
         - Inconsistent state
+        
+        Returns:
+            bool: True if deleted, False if not found or error
         """
         try:
+            # First check if exists
+            if not await self.exists(process_id):
+                return False
+                
             key = self._make_key(process_id)
             result_key = self._make_result_key(process_id)
             
@@ -495,9 +507,12 @@ class RedisProcessRepository(IProcessRepository):
                 pipe.srem(self._all_processes_key, process_id)
                 pipe.zrem(self._completed_key, process_id)
                 pipe.execute()
+            
+            return True
         
         except RedisError as e:
             print(f"Redis delete error: {e}")
+            return False
     
     async def list_all(self) -> List[ProcessInfo]:
         """
@@ -559,9 +574,10 @@ class RedisProcessRepository(IProcessRepository):
         Current approach is simpler.
         """
         try:
-            processes = self.list_all()
+            processes = await self.list_all()
             return {
                 "total": len(processes),
+                "pending": sum(1 for p in processes if p.status == "pending"),
                 "running": sum(1 for p in processes if p.status == "running"),
                 "completed": sum(1 for p in processes if p.status == "completed"),
                 "failed": sum(1 for p in processes if p.status == "failed"),
@@ -596,7 +612,7 @@ class RedisProcessRepository(IProcessRepository):
         for specific queries.
         """
         try:
-            cutoff_time = datetime.utcnow().timestamp() - (older_than_hours * 3600)
+            cutoff_time = datetime.now(UTC).timestamp() - (older_than_hours * 3600)
             
             # Find processes completed before cutoff
             old_processes = self._redis.zrangebyscore(

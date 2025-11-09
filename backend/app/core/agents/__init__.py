@@ -5,7 +5,7 @@ Contains all AI agents (decision agents and evaluator agents)
 used in the decision-making workflow.
 """
 
-from backend.app.core.agents.decision_agents import (
+from app.core.agents.decision_agents import (
     DECISION_AGENTS,
     get_agent,
     identify_trigger_agent,
@@ -20,7 +20,7 @@ from backend.app.core.agents.decision_agents import (
     result_agent,
 )
 
-from backend.app.core.agents.evaluator_agents import (
+from app.core.agents.evaluator_agents import (
     EVALUATOR_AGENTS,
     get_evaluator,
     list_evaluators,

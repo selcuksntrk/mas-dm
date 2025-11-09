@@ -9,8 +9,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from backend.app.config import get_settings
-from backend.app.api.routes import health, graph, decisions
+from app.config import get_settings
+from app.api.routes import health, graph, decisions
 
 
 # Get application settings
@@ -49,7 +49,7 @@ app = FastAPI(
     
     Each phase includes agent execution and evaluator validation with feedback loops.
     """,
-    version="0.2.0",
+    version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
@@ -102,7 +102,7 @@ async def startup_event():
     print("Multi-Agent Decision Making API")
     print("=" * 60)
     print(f"Version: {app.version}")
-    print(f"Docs: http://localhost:8000/docs")
+    print(f"Docs: http://localhost:8001/docs")
     print(f"Model: {settings.model_name}")
     print(f"Evaluation Model: {settings.evaluation_model}")
     print("=" * 60)
@@ -116,7 +116,7 @@ async def shutdown_event():
     
     Performs cleanup tasks when the application shuts down.
     """
-    print("\nShutting down Multi-Agent Decision Making API...")
+    print("\nShutting down Multi-Agent Decision Making APP...")
 
 
 if __name__ == "__main__":

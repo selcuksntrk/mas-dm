@@ -8,14 +8,14 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 
-from backend.app.models.requests import DecisionRequest
-from backend.app.models.responses import (
+from app.models.requests import DecisionRequest
+from app.models.responses import (
     DecisionResponse,
     ProcessStartResponse,
     ProcessStatusResponse,
     ErrorResponse,
 )
-from backend.app.services import DecisionService, get_process_manager
+from app.services import DecisionService, get_process_manager
 
 
 router = APIRouter(
@@ -164,7 +164,7 @@ async def start_decision_async(request: DecisionRequest, background_tasks: Backg
         
         return ProcessStartResponse(
             process_id=process_info.process_id,
-            status="started",
+            status=process_info.status,
             message="Decision-making process started in background"
         )
     
@@ -388,6 +388,7 @@ async def cleanup_processes():
         return {
             "status": "success",
             "message": f"Cleaned up {cleaned_count} completed/failed processes",
+            "removed_count": cleaned_count,
             "remaining_processes": stats["total"],
             "stats": stats
         }
@@ -469,7 +470,9 @@ async def list_processes():
                     "status": p.status,
                     "created_at": p.created_at,
                     "completed_at": p.completed_at,
-                    "has_error": p.error is not None
+                    "has_error": p.error is not None,
+                    # Only include result summary for completed processes
+                    "has_result": p.result is not None
                 }
                 for p in processes
             ]

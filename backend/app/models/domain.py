@@ -5,6 +5,7 @@ These represent the core concepts in your application domain.
 """
 
 from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -210,6 +211,12 @@ class ProcessInfo(BaseModel):
         description="Unique identifier for the process"
     )
     
+    # The original decision query submitted by the user
+    query: str = Field(
+        default="",
+        description="The original decision query for this process"
+    )
+    
     status: str = Field(
         ...,
         pattern="^(pending|running|completed|failed)$",
@@ -226,12 +233,14 @@ class ProcessInfo(BaseModel):
         description="Error message if process failed"
     )
     
-    created_at: Optional[str] = Field(
+    # Accept either an ISO formatted string or a datetime to make tests and
+    # repository implementations easier (they sometimes pass datetime objects).
+    created_at: Optional[datetime | str] = Field(
         default=None,
-        description="ISO format timestamp when process was created"
+        description="Timestamp when process was created (datetime or ISO string)"
     )
-    
-    completed_at: Optional[str] = Field(
+
+    completed_at: Optional[datetime | str] = Field(
         default=None,
-        description="ISO format timestamp when process completed"
+        description="Timestamp when process completed (datetime or ISO string)"
     )

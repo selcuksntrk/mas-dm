@@ -12,9 +12,9 @@ from typing import Optional
 from pydantic_graph import End
 from pydantic_graph.persistence.file import FileStatePersistence
 
-from backend.app.models.domain import DecisionState
-from backend.app.core.graph import decision_graph, run_decision_graph
-from backend.app.core.graph.nodes import GetDecision
+from app.models.domain import DecisionState
+from app.core.graph import decision_graph, run_decision_graph
+from app.core.graph.nodes import GetDecision
 
 
 class DecisionService:

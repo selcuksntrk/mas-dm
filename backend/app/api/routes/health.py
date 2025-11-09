@@ -6,7 +6,7 @@ Simple health check endpoints to verify API status.
 
 from fastapi import APIRouter
 
-from backend.app.models.responses import HealthResponse
+from app.models.responses import HealthResponse
 
 
 router = APIRouter(
@@ -49,5 +49,5 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         message="API is running",
-        version="0.2.0"
+        version="0.1.0"
     )

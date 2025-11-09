@@ -18,8 +18,8 @@ which either advances the workflow or loops back with feedback for improvement.
 
 from pydantic_graph import Graph
 
-from backend.app.models.domain import DecisionState
-from backend.app.core.graph.nodes import (
+from app.models.domain import DecisionState
+from app.core.graph.nodes import (
     # Agent nodes
     GetDecision,
     IdentifyTrigger,

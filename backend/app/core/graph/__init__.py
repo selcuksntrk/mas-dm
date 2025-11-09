@@ -5,14 +5,14 @@ Contains the graph definition, nodes, and execution logic for the
 multi-agent decision-making workflow.
 """
 
-from backend.app.core.graph.executor import (
+from app.core.graph.executor import (
     decision_graph,
     run_decision_graph,
     get_graph_mermaid,
     get_graph_structure,
 )
 
-from backend.app.core.graph.nodes import (
+from app.core.graph.nodes import (
     # Agent nodes
     GetDecision,
     IdentifyTrigger,

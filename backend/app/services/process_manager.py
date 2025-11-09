@@ -65,13 +65,13 @@ This follows:
 """
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Optional
 from uuid import uuid4
 
-from backend.app.models.domain import DecisionState, ProcessInfo
-from backend.app.services.decision_service import DecisionService
-from backend.app.services.redis_repository import (
+from app.models.domain import DecisionState, ProcessInfo
+from app.services.decision_service import DecisionService
+from app.services.redis_repository import (
     IProcessRepository,
     get_process_repository
 )
@@ -169,14 +169,18 @@ class ProcessManager:
         """
         # Generate unique process ID
         process_id = f"process_{uuid4().hex[:12]}"
-        
-        # Create process info
+
+        # Create process info. Use 'pending' so callers can see the
+        # process has been created but not yet executed. Store the
+        # original decision query on the ProcessInfo for later retrieval
+        # by background tasks.
         process_info = ProcessInfo(
             process_id=process_id,
-            status="running",
+            query=decision_query,
+            status="pending",
             result=None,
             error=None,
-            created_at=datetime.utcnow().isoformat(),
+            created_at=datetime.now(UTC).isoformat(),
             completed_at=None
         )
         
@@ -185,7 +189,7 @@ class ProcessManager:
         
         return process_info
     
-    async def execute_process(self, process_id: str, decision_query: str):
+    async def execute_process(self, process_id: str, decision_query: Optional[str] = None):
         """
         Execute a decision-making process and update its status.
         
@@ -218,20 +222,29 @@ class ProcessManager:
             >>> await manager.execute_process(process.process_id, "Should I switch careers?")
         """
         try:
+            # Determine decision query. If not provided, fetch it from
+            # the repository (compatibility with callers that only pass
+            # process_id).
+            if decision_query is None:
+                stored = await self._repository.get(process_id)
+                if not stored:
+                    return
+                decision_query = stored.query
+
             # Run the decision process
             state = await self._decision_service.run_decision(decision_query)
-            
+
             # Retrieve current process info from repository
             process_info = await self._repository.get(process_id)
             if process_info:
                 # Update process with result
                 process_info.status = "completed"
                 process_info.result = state
-                process_info.completed_at = datetime.utcnow().isoformat()
-                
+                process_info.completed_at = datetime.now(UTC).isoformat()
+
                 # Save back to repository
                 await self._repository.save(process_info)
-        
+
         except Exception as e:
             # Retrieve current process info from repository
             process_info = await self._repository.get(process_id)
@@ -239,8 +252,8 @@ class ProcessManager:
                 # Update process with error
                 process_info.status = "failed"
                 process_info.error = str(e)
-                process_info.completed_at = datetime.utcnow().isoformat()
-                
+                process_info.completed_at = datetime.now(UTC).isoformat()
+
                 # Save back to repository
                 await self._repository.save(process_info)
     
@@ -287,6 +300,10 @@ class ProcessManager:
         """
         return await self._repository.exists(process_id)
     
+    # Backwards-compatible alias
+    async def exists(self, process_id: str) -> bool:
+        return await self.process_exists(process_id)
+    
     async def get_all_processes(self) -> list[ProcessInfo]:
         """
         Get all tracked processes.
@@ -309,6 +326,10 @@ class ProcessManager:
             list[ProcessInfo]: List of all process information
         """
         return await self._repository.list_all()
+
+    # Backwards-compatible alias expected by older tests
+    async def list_all(self) -> list[ProcessInfo]:
+        return await self.get_all_processes()
     
     async def get_running_processes(self) -> list[ProcessInfo]:
         """
@@ -455,13 +476,15 @@ class ProcessManager:
             >>> print(f"Running: {stats['running']}, Completed: {stats['completed']}")
         """
         all_processes = await self._repository.list_all()
-        
+
+        pending = sum(1 for p in all_processes if p.status == "pending")
         running = sum(1 for p in all_processes if p.status == "running")
         completed = sum(1 for p in all_processes if p.status == "completed")
         failed = sum(1 for p in all_processes if p.status == "failed")
-        
+
         return {
             "total": len(all_processes),
+            "pending": pending,
             "running": running,
             "completed": completed,
             "failed": failed,

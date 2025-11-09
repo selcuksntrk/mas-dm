@@ -6,9 +6,9 @@ Endpoints for retrieving decision graph structure and visualization.
 
 from fastapi import APIRouter, HTTPException
 
-from backend.app.models.responses import MermaidResponse, ErrorResponse
-from backend.app.core.graph import get_graph_mermaid, get_graph_structure
-from backend.app.core.graph.nodes import GetDecision
+from app.models.responses import MermaidResponse, ErrorResponse
+from app.core.graph import get_graph_mermaid, get_graph_structure
+from app.core.graph.nodes import GetDecision
 
 
 router = APIRouter(
